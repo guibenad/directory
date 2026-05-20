@@ -1,0 +1,339 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================================================
+   TOKENS DARK (dashboards admin / super admin)
+   ================================================================ */
+:root {
+  --bg: #0f1117;
+  --bg2: #161922;
+  --bg3: #1d2130;
+  --card: #1f2435;
+  --border: #2a3048;
+  --border2: #35405e;
+  --text: #e8ebf4;
+  --text2: #8b93b3;
+  --text3: #555f82;
+  --amber: #f5a623;
+  --amber2: #ffd07a;
+  --amber-bg: #2a2010;
+  --blue: #4a90e2;
+  --blue-bg: #0d1a2e;
+  --green: #3dd68c;
+  --green-bg: #0d2420;
+  --red: #ff6b6b;
+  --red-bg: #2a0f0f;
+  --purple: #a78bfa;
+  --purple-bg: #1a1230;
+  --r: 10px;
+  --r2: 14px;
+
+  /* ================================================================
+     TOKENS 2026 (pages publiques)
+     ================================================================ */
+  --ink: #0b0b0c;
+  --ink-2: #1a1a1c;
+  --ink-3: #3a3a3d;
+  --mute: #6b6b70;
+  --mute-2: #9b9ba0;
+  --cream: #faf8f3;
+  --cream-2: #f3f0e8;
+  --mist: #e7e3d7;
+  --mist-2: #d8d3c3;
+  --glow-warm: #ffd5a8;
+  --glow-cool: #d4e4ff;
+  --accent: #f5a623;
+  --accent-soft: #ffe9c8;
+  --success: #2e8b57;
+
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-lift: 0 6px 12px rgba(0, 0, 0, 0.05), 0 24px 48px rgba(0, 0, 0, 0.1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100vh;
+}
+
+body {
+  font-family: "DM Sans", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Syne", sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+/* ================================================================
+   THEME PUBLIC 2026
+   ================================================================ */
+.theme-public {
+  background: var(--cream);
+  color: var(--ink);
+  --brand: var(--accent);
+}
+.theme-public h1,
+.theme-public h2,
+.theme-public h3,
+.theme-public h4 {
+  color: var(--ink);
+}
+
+/* Grain texture overlay (data URI SVG noise) */
+.noise {
+  position: relative;
+}
+.noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.45 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Hero mesh gradient (warm amber glow + cool accent) */
+.hero-mesh {
+  background-color: #0a0a0b;
+  background-image:
+    radial-gradient(1200px 500px at 80% -10%, rgba(245, 166, 35, 0.3), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(90, 140, 255, 0.22), transparent 55%),
+    radial-gradient(700px 400px at 50% 50%, rgba(255, 210, 170, 0.08), transparent 70%);
+}
+
+/* Hero mesh — variante claire (thème public) */
+.hero-mesh-light {
+  background-color: var(--cream);
+  background-image:
+    radial-gradient(1200px 500px at 80% -20%, rgba(245, 166, 35, 0.18), transparent 60%),
+    radial-gradient(800px 500px at 0% 100%, rgba(160, 180, 255, 0.15), transparent 55%);
+}
+
+/* Glass card — frosted */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(140%) blur(14px);
+  -webkit-backdrop-filter: saturate(140%) blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.glass-dark {
+  background: rgba(20, 20, 22, 0.55);
+  backdrop-filter: saturate(140%) blur(14px);
+  -webkit-backdrop-filter: saturate(140%) blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Card lift with animated accent bar */
+.card-lift {
+  position: relative;
+  transition: transform 0.35s var(--ease-out-expo), box-shadow 0.35s var(--ease-out-expo),
+    border-color 0.25s ease;
+  overflow: hidden;
+}
+.card-lift::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--brand, var(--accent));
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: transform 0.4s var(--ease-out-expo);
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--brand, var(--accent));
+}
+.card-lift:hover::before {
+  transform: scaleY(1);
+}
+
+/* Pill button (filter) */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--mist);
+  background: #fff;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-family: "DM Sans", sans-serif;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  cursor: pointer;
+}
+.pill:hover {
+  border-color: var(--ink);
+}
+.pill.active {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+/* Primary button */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffbb3c, var(--accent));
+  color: var(--ink);
+  font-weight: 700;
+  font-family: "Syne", sans-serif;
+  letter-spacing: -0.01em;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.45) inset, 0 6px 16px rgba(245, 166, 35, 0.35);
+  transition: transform 0.15s var(--ease-out-expo), box-shadow 0.2s;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) inset, 0 10px 22px rgba(245, 166, 35, 0.45);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-ink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+.btn-ink:hover {
+  background: var(--ink-2);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--mist);
+  background: transparent;
+  color: var(--ink-2);
+  transition: border-color 0.2s, background 0.2s;
+}
+.btn-ghost:hover {
+  border-color: var(--ink);
+  background: #fff;
+}
+
+/* Reveal on load */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+.reveal {
+  animation: reveal-up 0.7s var(--ease-out-expo) both;
+}
+.reveal-delay-1 {
+  animation-delay: 0.08s;
+}
+.reveal-delay-2 {
+  animation-delay: 0.16s;
+}
+.reveal-delay-3 {
+  animation-delay: 0.24s;
+}
+.reveal-delay-4 {
+  animation-delay: 0.32s;
+}
+
+/* Floating blob animation (décorative dans hero) */
+@keyframes float-slow {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(6px, -10px, 0);
+  }
+}
+.float-slow {
+  animation: float-slow 9s ease-in-out infinite;
+}
+
+/* Dot pulse (live indicator) */
+@keyframes pulse-dot {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(46, 139, 87, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(46, 139, 87, 0);
+  }
+}
+.pulse-dot {
+  animation: pulse-dot 2s infinite;
+}
+
+/* Underline sweep on link hover */
+.hover-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: background-size 0.35s var(--ease-out-expo);
+}
+.hover-underline:hover {
+  background-size: 100% 1px;
+}
+
+/* Focus rings discrets */
+input:focus,
+textarea:focus,
+select:focus,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Scrollbars light */
+.theme-public ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.theme-public ::-webkit-scrollbar-thumb {
+  background: var(--mist-2);
+  border-radius: 999px;
+}

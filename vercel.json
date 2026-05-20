@@ -1,0 +1,6 @@
+{
+  "crons": [
+    { "path": "/api/cron/trial-ending", "schedule": "0 9 * * *" },
+    { "path": "/api/cron/monthly-recap", "schedule": "0 8 1 * *" }
+  ]
+}

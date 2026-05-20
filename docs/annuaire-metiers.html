@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LocalPro — Annuaire de Métiers</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F1117;
+  --bg2:#161922;
+  --bg3:#1D2130;
+  --card:#1F2435;
+  --border:#2A3048;
+  --border2:#35405E;
+  --text:#E8EBF4;
+  --text2:#8B93B3;
+  --text3:#555F82;
+  --amber:#F5A623;
+  --amber2:#FFD07A;
+  --amber-bg:#2A2010;
+  --blue:#4A90E2;
+  --blue-bg:#0D1A2E;
+  --green:#3DD68C;
+  --green-bg:#0D2420;
+  --red:#FF6B6B;
+  --red-bg:#2A0F0F;
+  --purple:#A78BFA;
+  --purple-bg:#1A1230;
+  --r:10px;
+  --r2:14px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700}
+
+/* NAVIGATION PRINCIPALE */
+.app-nav{display:flex;align-items:center;border-bottom:1px solid var(--border);background:var(--bg2);padding:0 2rem;position:sticky;top:0;z-index:100;height:60px;gap:0}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--amber);margin-right:2.5rem;letter-spacing:-0.5px;white-space:nowrap}
+.logo span{color:var(--text);font-weight:400}
+.nav-tabs{display:flex;gap:0;flex:1;height:100%}
+.nav-tab{display:flex;align-items:center;gap:8px;padding:0 1.25rem;font-size:13.5px;color:var(--text2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .2s;font-family:'DM Sans',sans-serif;white-space:nowrap;height:100%}
+.nav-tab:hover{color:var(--text);background:var(--bg3)}
+.nav-tab.active{color:var(--amber);border-bottom-color:var(--amber)}
+.nav-tab .icon{font-size:15px}
+.nav-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.nav-btn{padding:7px 16px;border-radius:8px;font-size:13px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;font-weight:500}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-outline:hover{border-color:var(--amber);color:var(--amber)}
+.btn-primary{background:var(--amber);color:#0F1117}
+.btn-primary:hover{background:var(--amber2)}
+
+/* PAGES */
+.page{display:none;padding:2rem;max-width:1300px;margin:0 auto;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:2rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.25rem 1.5rem;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:50%;opacity:.06;transform:translate(20px,-20px)}
+.stat-card.amber::before{background:var(--amber)}
+.stat-card.green::before{background:var(--green)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.purple::before{background:var(--purple)}
+.stat-label{font-size:12px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.8px;margin-bottom:.5rem}
+.stat-value{font-family:'Syne',sans-serif;font-size:32px;font-weight:700;color:var(--text);line-height:1.1}
+.stat-value.amber{color:var(--amber)}
+.stat-value.green{color:var(--green)}
+.stat-value.blue{color:var(--blue)}
+.stat-value.purple{color:var(--purple)}
+.stat-delta{font-size:12px;margin-top:.4rem;display:flex;align-items:center;gap:4px}
+.delta-up{color:var(--green)}
+.delta-down{color:var(--red)}
+
+/* CHARTS AREA */
+.charts-row{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:2rem}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.5rem}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.chart-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600}
+.chart-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:120px}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.bar{width:100%;border-radius:4px 4px 0 0;background:var(--amber);opacity:.7;transition:opacity .2s;min-height:4px;cursor:pointer}
+.bar:hover{opacity:1}
+.bar-label{font-size:11px;color:var(--text3)}
+
+/* DONUT */
+.donut-wrap{display:flex;align-items:center;justify-content:center;gap:1.5rem}
+.donut-legend{display:flex;flex-direction:column;gap:10px}
+.donut-item{display:flex;align-items:center;gap:8px;font-size:13px}
+.donut-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* TABLE */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:2rem}
+.table-head{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+.table-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600}
+.search-input{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;width:220px}
+.search-input::placeholder{color:var(--text3)}
+.search-input:focus{outline:none;border-color:var(--amber)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 1.5rem;text-align:left;font-size:11.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer}
+tbody tr:hover{background:var(--bg3)}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:14px 1.5rem;font-size:13.5px;vertical-align:middle}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:500}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+.badge-purple{background:var(--purple-bg);color:var(--purple)}
+.badge-gray{background:var(--bg3);color:var(--text2)}
+
+/* AVATAR */
+.avatar{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;font-family:'Syne',sans-serif;flex-shrink:0}
+.company-row{display:flex;align-items:center;gap:10px}
+.company-info .name{font-weight:500;color:var(--text);font-size:14px}
+.company-info .sub{font-size:12px;color:var(--text3)}
+
+/* MESSAGES */
+.msg-layout{display:grid;grid-template-columns:300px 1fr;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;height:500px}
+.msg-list{border-right:1px solid var(--border);overflow-y:auto}
+.msg-list-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:14px;font-weight:600}
+.msg-item{padding:1rem 1.25rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.msg-item:hover{background:var(--bg3)}
+.msg-item.active{background:var(--bg3);border-left:3px solid var(--amber)}
+.msg-item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.msg-sender{font-size:13.5px;font-weight:500}
+.msg-time{font-size:11px;color:var(--text3)}
+.msg-preview{font-size:12.5px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-unread{background:var(--amber);color:#0F1117;width:18px;height:18px;border-radius:50%;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.msg-panel{display:flex;flex-direction:column}
+.msg-panel-head{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.msg-thread{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:12px}
+.bubble{max-width:70%;padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.5}
+.bubble.visitor{background:var(--bg3);color:var(--text);align-self:flex-start;border-radius:4px 12px 12px 12px}
+.bubble.company{background:var(--amber);color:#0F1117;align-self:flex-end;border-radius:12px 4px 12px 12px}
+.bubble-time{font-size:11px;color:var(--text3);margin-top:3px}
+.msg-input-row{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:8px}
+.msg-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13.5px;font-family:'DM Sans',sans-serif}
+.msg-input:focus{outline:none;border-color:var(--amber)}
+
+/* ABONNEMENTS */
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:2rem}
+.plan-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.75rem;position:relative}
+.plan-card.featured{border-color:var(--amber);background:linear-gradient(135deg,var(--amber-bg),var(--card))}
+.plan-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--amber);color:#0F1117;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;white-space:nowrap;font-family:'Syne',sans-serif}
+.plan-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:.4rem}
+.plan-price{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--amber);line-height:1}
+.plan-price span{font-size:14px;font-weight:400;color:var(--text2)}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin:1.25rem 0}
+.plan-feature{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text2)}
+.plan-feature::before{content:'✓';color:var(--green);font-weight:700;font-size:14px}
+
+/* SEO PAGE */
+.seo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:2rem}
+.seo-page-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem;cursor:pointer;transition:all .2s}
+.seo-page-card:hover{border-color:var(--amber);transform:translateY(-2px)}
+.seo-url{font-size:12px;color:var(--amber);margin-bottom:.5rem;font-family:'DM Sans',sans-serif}
+.seo-title-text{font-size:14px;font-weight:500;margin-bottom:.4rem;font-family:'Syne',sans-serif}
+.seo-meta{font-size:12px;color:var(--text3);display:flex;gap:12px}
+
+/* PUBLIC PAGE */
+.public-page{background:#FAFAF8;color:#1A1A1A;min-height:100vh}
+.pub-header{background:#fff;border-bottom:1px solid #E8E8E0;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.pub-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:#1A1A1A}
+.pub-logo span{color:#F5A623}
+.pub-hero{background:#1A1A1A;color:#fff;padding:4rem 2rem;text-align:center}
+.pub-hero h1{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;line-height:1.15;margin-bottom:1rem}
+.pub-hero h1 span{color:#F5A623}
+.pub-breadcrumb{font-size:13px;color:#999;margin-bottom:.75rem}
+.pub-hero p{font-size:17px;color:#B0B0B0;margin-bottom:2rem;max-width:600px;margin-left:auto;margin-right:auto}
+.pub-search-row{display:flex;gap:12px;max-width:600px;margin:0 auto;flex-wrap:wrap}
+.pub-search{flex:1;padding:14px 18px;border-radius:10px;border:none;font-size:15px;font-family:'DM Sans',sans-serif;min-width:180px}
+.pub-btn{background:#F5A623;color:#1A1A1A;padding:14px 28px;border-radius:10px;border:none;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif}
+.pub-content{padding:2rem;max-width:1100px;margin:0 auto}
+.pub-filters{display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap}
+.pub-filter{padding:7px 14px;border-radius:20px;border:1px solid #DDD;background:#fff;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.pub-filter.active{background:#1A1A1A;color:#fff;border-color:#1A1A1A}
+.pub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.pub-card{background:#fff;border:1px solid #E8E8E0;border-radius:14px;padding:1.5rem;cursor:pointer;transition:all .2s;position:relative}
+.pub-card:hover{border-color:#F5A623;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.pub-card-badge{position:absolute;top:1rem;right:1rem;background:#F5A623;color:#1A1A1A;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'Syne',sans-serif}
+.pub-avatar{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:20px;margin-bottom:1rem}
+.pub-card-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:.25rem}
+.pub-card-meta{font-size:13px;color:#777;margin-bottom:.75rem}
+.pub-card-info{display:flex;flex-direction:column;gap:5px;font-size:13px;color:#555}
+.pub-card-info-row{display:flex;align-items:center;gap:6px}
+.pub-stars{color:#F5A623;font-size:14px;letter-spacing:1px}
+.pub-cta{background:#1A1A1A;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13.5px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;margin-top:1rem;width:100%}
+.pub-seo-footer{background:#1A1A1A;color:#888;padding:2rem;font-size:13px;text-align:center;margin-top:2rem;line-height:2}
+.pub-seo-footer a{color:#F5A623;text-decoration:none}
+
+/* SECTION HEADER */
+.section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:1.5rem}
+.section-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700}
+.section-sub{font-size:13.5px;color:var(--text3);margin-top:.3rem}
+
+/* TOGGLE PILL */
+.view-toggle{display:flex;gap:0;background:var(--bg3);border-radius:8px;padding:3px;border:1px solid var(--border)}
+.view-btn{padding:5px 14px;border-radius:6px;font-size:12.5px;cursor:pointer;border:none;background:none;color:var(--text2);font-family:'DM Sans',sans-serif;transition:all .15s}
+.view-btn.active{background:var(--card);color:var(--text);border:1px solid var(--border)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:2rem;width:540px;max-height:80vh;overflow-y:auto}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:1.5rem}
+.form-group{margin-bottom:1.25rem}
+.form-label{display:block;font-size:12.5px;color:var(--text3);margin-bottom:.5rem;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif}
+.form-input:focus{outline:none;border-color:var(--amber)}
+.form-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer}
+.form-row{display:flex;gap:12px}
+.form-row .form-group{flex:1}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem}
+
+/* RESPONSIVE MINI CHART */
+.sparkline{display:flex;align-items:flex-end;gap:3px;height:32px}
+.spark-bar{flex:1;background:var(--green);border-radius:2px 2px 0 0;opacity:.6;min-height:3px}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+/* TOP BAR */
+.top-bar{background:var(--amber);color:#0F1117;text-align:center;padding:7px;font-size:12.5px;font-weight:500}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="app-nav">
+  <div class="logo">Local<span>Pro</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dashboard')"><span class="icon">📊</span> Tableau de bord</button>
+    <button class="nav-tab" onclick="showPage('entreprises')"><span class="icon">🏢</span> Entreprises</button>
+    <button class="nav-tab" onclick="showPage('abonnements')"><span class="icon">💳</span> Abonnements</button>
+    <button class="nav-tab" onclick="showPage('messages')"><span class="icon">💬</span> Messages <span class="msg-unread" style="margin-left:4px">3</span></button>
+    <button class="nav-tab" onclick="showPage('seo')"><span class="icon">🔍</span> Pages SEO</button>
+    <button class="nav-tab" onclick="showPage('public')"><span class="icon">🌐</span> Vue publique</button>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn btn-outline" onclick="openModal()">+ Ajouter</button>
+    <div style="width:34px;height:34px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0F1117;cursor:pointer;font-family:'Syne',sans-serif">A</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Tableau de bord</div>
+      <div class="section-sub">Aperçu global — Mars 2025</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select class="form-select" style="width:auto;padding:6px 12px;font-size:13px">
+        <option>30 derniers jours</option>
+        <option>Cette semaine</option>
+        <option>Ce mois-ci</option>
+        <option>Cette année</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card amber">
+      <div class="stat-label">Revenus MRR</div>
+      <div class="stat-value amber">4 820 €</div>
+      <div class="stat-delta delta-up">↑ +18% vs mois dernier</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Entreprises actives</div>
+      <div class="stat-value green">247</div>
+      <div class="stat-delta delta-up">↑ +12 ce mois</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Visiteurs / mois</div>
+      <div class="stat-value blue">18 430</div>
+      <div class="stat-delta delta-up">↑ +34% organique</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-label">Messages envoyés</div>
+      <div class="stat-value purple">1 247</div>
+      <div class="stat-delta delta-up">↑ +22% ce mois</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Visites organiques par semaine</div>
+          <div class="chart-sub">Trafic SEO — 12 dernières semaines</div>
+        </div>
+        <span class="badge badge-green">+34% ↑</span>
+      </div>
+      <div class="bar-chart" id="visitChart"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px" id="visitLabels"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Répartition abonnements</div>
+          <div class="chart-sub">247 entreprises actives</div>
+        </div>
+      </div>
+      <div class="donut-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#2A3048" stroke-width="18"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#F5A623" stroke-width="18" stroke-dasharray="75.4 175.9" stroke-dashoffset="-43.9" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#4A90E2" stroke-width="18" stroke-dasharray="113.1 137.1" stroke-dashoffset="-119.3" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#3DD68C" stroke-width="18" stroke-dasharray="62.8 188" stroke-dashoffset="-7.1" stroke-linecap="round"/>
+          <text x="55" y="59" text-anchor="middle" font-family="'Syne',sans-serif" font-size="15" font-weight="700" fill="#E8EBF4">247</text>
+        </svg>
+        <div class="donut-legend">
+          <div class="donut-item"><div class="donut-dot" style="background:#F5A623"></div><div><div style="font-size:13px;font-weight:500">Pro — 96</div><div style="font-size:12px;color:var(--text3)">39% · 49€/mois</div></div></div>
+          <div class="donut-item"><div class="donut-dot" style="background:#4A90E2"></div><div><div style="font-size:13px;font-weight:500">Essentiel — 111</div><div style="font-size:12px;color:var(--text3)">45% · 29€/mois</div></div></div>
+          <div class="donut-item"><div class="donut-dot" style="background:#3DD68C"></div><div><div style="font-size:13px;font-weight:500">Starter — 40</div><div style="font-size:12px;color:var(--text3)">16% · 9€/mois</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP PAGES SEO -->
+  <div class="chart-card" style="margin-bottom:2rem">
+    <div class="chart-header">
+      <div><div class="chart-title">Top pages SEO ce mois</div><div class="chart-sub">Position Google · clics · impressions</div></div>
+      <button class="nav-btn btn-outline" onclick="showPage('seo')" style="font-size:12px">Voir toutes →</button>
+    </div>
+    <table style="font-size:13px">
+      <thead><tr>
+        <th>Page</th><th>Position</th><th>Clics</th><th>Impressions</th><th>CTR</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><span style="color:var(--amber)">/plombier/nice</span></td><td><span class="badge badge-green">#2</span></td><td>1 240</td><td>8 900</td><td>13.9%</td></tr>
+        <tr><td><span style="color:var(--amber)">/electricien/nice</span></td><td><span class="badge badge-green">#3</span></td><td>980</td><td>7 200</td><td>13.6%</td></tr>
+        <tr><td><span style="color:var(--amber)">/maçon/nice</span></td><td><span class="badge badge-amber">#5</span></td><td>640</td><td>5 400</td><td>11.9%</td></tr>
+        <tr><td><span style="color:var(--amber)">/peintre/nice</span></td><td><span class="badge badge-amber">#7</span></td><td>520</td><td>4 800</td><td>10.8%</td></tr>
+        <tr><td><span style="color:var(--amber)">/serrurier/nice</span></td><td><span class="badge badge-blue">#11</span></td><td>310</td><td>3 200</td><td>9.7%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DERNIERS INSCRITS -->
+  <div class="table-card">
+    <div class="table-head">
+      <div class="table-title">Dernières inscriptions</div>
+      <button class="nav-btn btn-primary" onclick="openModal()">+ Ajouter une entreprise</button>
+    </div>
+    <table>
+      <thead><tr><th>Entreprise</th><th>Métier</th><th>Ville</th><th>Plan</th><th>Statut</th><th>MRR</th></tr></thead>
+      <tbody>
+        <tr onclick="showPage('entreprises')">
+          <td><div class="company-row"><div class="avatar" style="background:#2A2010;color:#F5A623">PM</div><div class="company-info"><div class="name">Plomberie Martin</div><div class="sub">paul.martin@gmail.com</div></div></div></td>
+          <td>Plombier</td><td>Nice</td>
+          <td><span class="badge badge-amber">Pro</span></td>
+          <td><span class="badge badge-green">Actif</span></td>
+          <td style="font-weight:500;color:var(--amber)">49 €</td>
+        </tr>
+        <tr onclick="showPage('entreprises')">
+          <td><div class="company-row"><div class="avatar" style="background:#0D1A2E;color:#4A90E2">ÉD</div><div class="company-info"><div class="name">Élec Dubois</div><div class="sub">m.dubois@elec.fr</div></div></div></td>
+          <td>Électricien</td><td>Nice</td>
+          <td><span class="badge badge-blue">Essentiel</span></td>
+          <td><span class="badge badge-green">Actif</span></td>
+          <td style="font-weight:500;color:var(--amber)">29 €</td>
+        </tr>
+        <tr onclick="showPage('entreprises')">
+          <td><div class="company-row"><div class="avatar" style="background:#0D2420;color:#3DD68C">RN</div><div class="company-info"><div class="name">Renov'Nice</div><div class="sub">contact@renovnice.fr</div></div></div></td>
+          <td>Maçon</td><td>Nice</td>
+          <td><span class="badge badge-green">Starter</span></td>
+          <td><span class="badge badge-amber">Essai</span></td>
+          <td style="font-weight:500;color:var(--text3)">0 €</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ENTREPRISES -->
+<div class="page" id="page-entreprises">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Entreprises</div>
+      <div class="section-sub">247 entreprises · 12 en attente de validation</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <input class="search-input" placeholder="🔍  Rechercher..." style="width:260px">
+      <select class="form-select" style="width:auto;padding:6px 12px;font-size:13px"><option>Tous les métiers</option><option>Plombier</option><option>Électricien</option><option>Maçon</option></select>
+      <select class="form-select" style="width:auto;padding:6px 12px;font-size:13px"><option>Tous plans</option><option>Pro</option><option>Essentiel</option><option>Starter</option></select>
+      <button class="nav-btn btn-primary" onclick="openModal()">+ Ajouter</button>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead><tr><th>Entreprise</th><th>Métier</th><th>Ville</th><th>Plan</th><th>Statut</th><th>Depuis</th><th>Visites/mois</th><th>Messages</th><th>MRR</th></tr></thead>
+      <tbody id="entreprisesTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ABONNEMENTS -->
+<div class="page" id="page-abonnements">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Abonnements</div>
+      <div class="section-sub">Gérez vos plans et la facturation</div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <div style="background:var(--green-bg);border:1px solid var(--green);border-radius:8px;padding:8px 16px;font-size:13px;color:var(--green)">MRR total : <strong>4 820 €/mois</strong></div>
+    </div>
+  </div>
+
+  <div class="plans-grid">
+    <div class="plan-card">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">9 <span>€ / mois</span></div>
+      <ul class="plan-features">
+        <li class="plan-feature">Fiche entreprise basique</li>
+        <li class="plan-feature">1 photo</li>
+        <li class="plan-feature">Apparition dans l'annuaire</li>
+        <li class="plan-feature">Messages visiteurs</li>
+      </ul>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <div style="font-size:13px;color:var(--text3)">40 abonnés</div>
+        <div style="font-size:16px;font-weight:700;color:var(--green)">360 €/mois</div>
+      </div>
+    </div>
+    <div class="plan-card featured">
+      <div class="plan-badge">⭐ Populaire</div>
+      <div class="plan-name">Essentiel</div>
+      <div class="plan-price">29 <span>€ / mois</span></div>
+      <ul class="plan-features">
+        <li class="plan-feature">Fiche complète + 10 photos</li>
+        <li class="plan-feature">Mise en avant dans la liste</li>
+        <li class="plan-feature">Badge "Certifié"</li>
+        <li class="plan-feature">Statistiques basiques</li>
+        <li class="plan-feature">Réponse aux avis</li>
+      </ul>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <div style="font-size:13px;color:var(--text3)">111 abonnés</div>
+        <div style="font-size:16px;font-weight:700;color:var(--amber)">3 219 €/mois</div>
+      </div>
+    </div>
+    <div class="plan-card">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">49 <span>€ / mois</span></div>
+      <ul class="plan-features">
+        <li class="plan-feature">Fiche premium illimitée</li>
+        <li class="plan-feature">Position prioritaire #1</li>
+        <li class="plan-feature">Lien site web + réseaux</li>
+        <li class="plan-feature">Stats avancées + leads</li>
+        <li class="plan-feature">Support prioritaire</li>
+        <li class="plan-feature">Bandeau "Partenaire Pro"</li>
+      </ul>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <div style="font-size:13px;color:var(--text3)">96 abonnés</div>
+        <div style="font-size:16px;font-weight:700;color:var(--purple)">4 704 €/mois</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:2rem">
+    <div class="chart-header">
+      <div><div class="chart-title">Historique des revenus</div><div class="chart-sub">12 derniers mois</div></div>
+      <span class="badge badge-green">4 820 € ce mois ↑</span>
+    </div>
+    <div class="bar-chart" id="revenueChart"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:8px" id="revenueLabels"></div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-head">
+      <div class="table-title">Paiements récents</div>
+      <input class="search-input" placeholder="🔍  Rechercher..." style="width:220px">
+    </div>
+    <table>
+      <thead><tr><th>Entreprise</th><th>Plan</th><th>Montant</th><th>Date</th><th>Statut</th><th>Prochain paiement</th></tr></thead>
+      <tbody>
+        <tr><td><div class="company-row"><div class="avatar" style="background:#2A2010;color:#F5A623;width:28px;height:28px;font-size:11px">PM</div><span style="font-size:13.5px;margin-left:8px">Plomberie Martin</span></div></td><td><span class="badge badge-amber">Pro</span></td><td style="font-weight:500">49 €</td><td style="color:var(--text3)">01/03/2025</td><td><span class="badge badge-green">Payé</span></td><td style="color:var(--text3)">01/04/2025</td></tr>
+        <tr><td><div class="company-row"><div class="avatar" style="background:#0D1A2E;color:#4A90E2;width:28px;height:28px;font-size:11px">ÉD</div><span style="font-size:13.5px;margin-left:8px">Élec Dubois</span></div></td><td><span class="badge badge-blue">Essentiel</span></td><td style="font-weight:500">29 €</td><td style="color:var(--text3)">28/02/2025</td><td><span class="badge badge-green">Payé</span></td><td style="color:var(--text3)">28/03/2025</td></tr>
+        <tr><td><div class="company-row"><div class="avatar" style="background:#2A0F0F;color:#FF6B6B;width:28px;height:28px;font-size:11px">TB</div><span style="font-size:13.5px;margin-left:8px">Toiture Brun</span></div></td><td><span class="badge badge-amber">Pro</span></td><td style="font-weight:500">49 €</td><td style="color:var(--text3)">25/02/2025</td><td><span class="badge badge-red">Échoué</span></td><td style="color:var(--red)">Relance auto →</td></tr>
+        <tr><td><div class="company-row"><div class="avatar" style="background:#0D2420;color:#3DD68C;width:28px;height:28px;font-size:11px">RN</div><span style="font-size:13.5px;margin-left:8px">Renov'Nice</span></div></td><td><span class="badge badge-green">Starter</span></td><td style="font-weight:500">9 €</td><td style="color:var(--text3)">20/02/2025</td><td><span class="badge badge-green">Payé</span></td><td style="color:var(--text3)">20/03/2025</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MESSAGES -->
+<div class="page" id="page-messages">
+  <div class="section-header">
+    <div><div class="section-title">Messagerie</div><div class="section-sub">Conversations entre visiteurs et entreprises</div></div>
+    <div style="display:flex;gap:8px">
+      <span class="badge badge-amber">3 non lus</span>
+      <select class="form-select" style="width:auto;padding:6px 12px;font-size:13px"><option>Tous</option><option>Non lus</option><option>En attente</option></select>
+    </div>
+  </div>
+
+  <div class="msg-layout">
+    <div class="msg-list">
+      <div class="msg-list-head">Conversations (24)</div>
+      <div class="msg-item active" onclick="selectMsg(this,'Plomberie Martin','Sophie L.','Bonjour, est-ce que vous intervenez le week-end pour une fuite urgente ?','14h32')">
+        <div class="msg-item-head"><span class="msg-sender">Sophie L. → Plomberie Martin</span><span class="msg-unread">2</span></div>
+        <div class="msg-preview">Bonjour, est-ce que vous intervenez le week-end...</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">14h32 · Aujourd'hui</div>
+      </div>
+      <div class="msg-item" onclick="selectMsg(this,'Élec Dubois','Marc T.','Quel est votre délai pour l\'installation d\'un tableau électrique ?','09h15')">
+        <div class="msg-item-head"><span class="msg-sender">Marc T. → Élec Dubois</span><span class="msg-unread">1</span></div>
+        <div class="msg-preview">Quel est votre délai pour l'installation...</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">09h15 · Aujourd'hui</div>
+      </div>
+      <div class="msg-item" onclick="selectMsg(this,'Renov\'Nice','Julie D.','Pouvez-vous me donner un devis pour repeindre un appartement de 60m² ?','Hier')">
+        <div class="msg-item-head"><span class="msg-sender">Julie D. → Renov'Nice</span><span class="msg-time">Hier</span></div>
+        <div class="msg-preview">Pouvez-vous me donner un devis pour repeindre...</div>
+      </div>
+      <div class="msg-item" onclick="selectMsg(this,'Menuiserie Côte d\'Azur','Pierre A.','Bonjour, avez-vous des disponibilités pour la semaine prochaine ?','Mar')">
+        <div class="msg-item-head"><span class="msg-sender">Pierre A. → Menuiserie CA</span><span class="msg-time">Mar</span></div>
+        <div class="msg-preview">Bonjour, avez-vous des disponibilités...</div>
+      </div>
+      <div class="msg-item" onclick="selectMsg(this,'Toiture Brun','Anna M.','Mon toit fuit depuis les dernières pluies, urgent !','Lun')">
+        <div class="msg-item-head"><span class="msg-sender">Anna M. → Toiture Brun</span><span class="msg-time">Lun</span></div>
+        <div class="msg-preview">Mon toit fuit depuis les dernières pluies...</div>
+      </div>
+    </div>
+    <div class="msg-panel">
+      <div class="msg-panel-head">
+        <div class="avatar" style="background:#2A2010;color:#F5A623;width:36px;height:36px;font-size:13px">PM</div>
+        <div>
+          <div style="font-weight:500;font-size:14px" id="msg-panel-title">Sophie L. → Plomberie Martin</div>
+          <div style="font-size:12px;color:var(--text3)">Plombier · Nice · Plan Pro</div>
+        </div>
+        <span class="badge badge-amber" style="margin-left:auto">Pro</span>
+      </div>
+      <div class="msg-thread" id="msg-thread">
+        <div>
+          <div class="bubble visitor">Bonjour, est-ce que vous intervenez le week-end pour une fuite urgente ?</div>
+          <div class="bubble-time">Sophie L. · 14h32</div>
+        </div>
+        <div style="align-self:flex-end;text-align:right">
+          <div class="bubble company">Bonjour Sophie ! Oui, nous intervenons 7j/7 pour les urgences. Quel est votre adresse et la nature de la fuite ?</div>
+          <div class="bubble-time">Plomberie Martin · 14h45</div>
+        </div>
+        <div>
+          <div class="bubble visitor">C'est au 12 rue de la République, Nice. Une fuite sous l'évier de cuisine, l'eau coule en permanence.</div>
+          <div class="bubble-time">Sophie L. · 14h48</div>
+        </div>
+      </div>
+      <div class="msg-input-row">
+        <input class="msg-input" placeholder="Répondre en tant qu'administrateur..." id="msg-input-field">
+        <button class="nav-btn btn-primary" onclick="sendAdminMsg()">Envoyer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SEO -->
+<div class="page" id="page-seo">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Pages SEO générées</div>
+      <div class="section-sub">Chaque page cible un métier × ville — générée automatiquement et optimisée</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="nav-btn btn-outline" onclick="openModal()">+ Nouvelle ville</button>
+      <button class="nav-btn btn-primary" onclick="openModal()">+ Nouveau métier</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card blue"><div class="stat-label">Pages indexées</div><div class="stat-value blue">142</div><div class="stat-delta delta-up">↑ +28 ce mois</div></div>
+    <div class="stat-card green"><div class="stat-label">Mots-clés top 10</div><div class="stat-value green">67</div><div class="stat-delta delta-up">↑ +14 ce mois</div></div>
+    <div class="stat-card amber"><div class="stat-label">Impressions / mois</div><div class="stat-value amber">41 200</div><div class="stat-delta delta-up">↑ +62%</div></div>
+    <div class="stat-card purple"><div class="stat-label">Clics organiques</div><div class="stat-value purple">5 830</div><div class="stat-delta delta-up">↑ +48%</div></div>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:1.5rem">
+    <div class="chart-header">
+      <div><div class="chart-title">Structure des URLs générées</div><div class="chart-sub">Schéma duplicable par métier et ville</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <div style="background:var(--bg3);border-radius:10px;padding:1rem;border-left:3px solid var(--amber)">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px">Modèle URL</div>
+        <code style="color:var(--amber);font-size:13px">/[métier]/[ville]</code>
+        <div style="font-size:12px;color:var(--text2);margin-top:.5rem">Ex: /plombier/nice</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:1rem;border-left:3px solid var(--blue)">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px">Title tag</div>
+        <div style="font-size:12px;color:var(--blue)">Plombier à Nice — Devis gratuit · LocalPro</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:1rem;border-left:3px solid var(--green)">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px">H1 de page</div>
+        <div style="font-size:12px;color:var(--green)">Les meilleurs plombiers à Nice — Annuaire</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:1rem;border-left:3px solid var(--purple)">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px">Données structurées</div>
+        <div style="font-size:12px;color:var(--purple)">Schema.org LocalBusiness ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-header" style="margin-bottom:1rem">
+    <div class="chart-title">Pages générées</div>
+    <div style="display:flex;gap:8px">
+      <input class="search-input" placeholder="🔍  /electricien/nice...">
+      <select class="form-select" style="width:auto;padding:6px 12px;font-size:13px"><option>Toutes villes</option><option>Nice</option><option>Cannes</option><option>Antibes</option></select>
+    </div>
+  </div>
+
+  <div class="seo-grid" id="seoGrid"></div>
+</div>
+
+<!-- PAGE PUBLIQUE -->
+<div class="page" id="page-public">
+  <div style="margin-bottom:1rem;display:flex;align-items:center;gap:12px">
+    <div class="section-title">Aperçu — Page publique</div>
+    <span class="badge badge-green">Vue visiteur</span>
+    <span style="font-size:13px;color:var(--text3)">Telle que la voit Google et vos visiteurs</span>
+  </div>
+  <div style="border:2px solid var(--border);border-radius:16px;overflow:hidden">
+    <div class="top-bar">🔍 URL : localpro.fr/plombier/nice — Page SEO optimisée · Meta title: "Plombier à Nice — Devis gratuit · LocalPro"</div>
+    <div class="public-page">
+      <div class="pub-header">
+        <div class="pub-logo">Local<span>Pro</span></div>
+        <div style="display:flex;gap:8px;font-size:13px;color:#555">
+          <a href="#" style="color:#555;text-decoration:none">Trouver un pro</a>
+          <span>·</span>
+          <a href="#" style="color:#555;text-decoration:none">Déposer mon entreprise</a>
+          <span>·</span>
+          <a href="#" style="color:#F5A623;font-weight:600;text-decoration:none">Abonnement</a>
+        </div>
+      </div>
+      <div class="pub-hero">
+        <div class="pub-breadcrumb">Accueil › Artisans › <strong>Plombier</strong> › Nice</div>
+        <h1>Plombier à <span>Nice</span><br>Devis gratuit · Intervention rapide</h1>
+        <p>Trouvez les meilleurs plombiers à Nice, comparez les avis et obtenez un devis gratuitement. 24 artisans référencés.</p>
+        <div class="pub-search-row">
+          <input class="pub-search" placeholder="Ex: fuite, chauffe-eau, salle de bain...">
+          <button class="pub-btn">Rechercher</button>
+        </div>
+      </div>
+      <div class="pub-content">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+          <div style="font-size:14px;color:#555"><strong>24 plombiers</strong> trouvés à Nice</div>
+          <div class="pub-filters">
+            <button class="pub-filter active">Tous</button>
+            <button class="pub-filter">Urgences 24h/24</button>
+            <button class="pub-filter">Devis gratuit</button>
+            <button class="pub-filter">Certifiés</button>
+            <button class="pub-filter">Note ≥ 4★</button>
+          </div>
+        </div>
+        <div class="pub-grid">
+          <div class="pub-card">
+            <div class="pub-card-badge">⭐ Pro</div>
+            <div class="pub-avatar" style="background:#FFF3E0;color:#E65100">PM</div>
+            <div class="pub-card-name">Plomberie Martin</div>
+            <div class="pub-card-meta">Plombier certifié · Nice (06)</div>
+            <div class="pub-stars">★★★★★</div>
+            <div style="font-size:12px;color:#777;margin-top:2px">4.9/5 · 38 avis</div>
+            <div class="pub-card-info" style="margin-top:12px">
+              <div class="pub-card-info-row"><span>📍</span>12 rue de la République, Nice</div>
+              <div class="pub-card-info-row"><span>📞</span>04 93 XX XX XX</div>
+              <div class="pub-card-info-row"><span>⏰</span>Disponible 7j/7 · Urgences</div>
+              <div class="pub-card-info-row"><span>✅</span>Devis gratuit sous 24h</div>
+            </div>
+            <button class="pub-cta">📩 Envoyer un message gratuit</button>
+          </div>
+          <div class="pub-card">
+            <div class="pub-avatar" style="background:#E8F5E9;color:#2E7D32">SD</div>
+            <div class="pub-card-name">Sanitaire Dupont</div>
+            <div class="pub-card-meta">Plombier · Nice-Ouest (06)</div>
+            <div class="pub-stars">★★★★☆</div>
+            <div style="font-size:12px;color:#777;margin-top:2px">4.6/5 · 21 avis</div>
+            <div class="pub-card-info" style="margin-top:12px">
+              <div class="pub-card-info-row"><span>📍</span>45 av. Jean Médecin, Nice</div>
+              <div class="pub-card-info-row"><span>📞</span>04 93 YY YY YY</div>
+              <div class="pub-card-info-row"><span>⏰</span>Lun–Sam 8h–19h</div>
+            </div>
+            <button class="pub-cta" style="background:#F5F5F0;color:#1A1A1A">📩 Envoyer un message gratuit</button>
+          </div>
+          <div class="pub-card">
+            <div class="pub-card-badge" style="background:#E3F2FD;color:#1565C0">Certifié</div>
+            <div class="pub-avatar" style="background:#FCE4EC;color:#880E4F">AZ</div>
+            <div class="pub-card-name">AZ Plomberie</div>
+            <div class="pub-card-meta">Plombier · Côte-d'Azur (06)</div>
+            <div class="pub-stars">★★★★★</div>
+            <div style="font-size:12px;color:#777;margin-top:2px">5.0/5 · 12 avis</div>
+            <div class="pub-card-info" style="margin-top:12px">
+              <div class="pub-card-info-row"><span>📍</span>8 bd Gambetta, Nice</div>
+              <div class="pub-card-info-row"><span>⏰</span>Urgences 24h/24 7j/7</div>
+            </div>
+            <button class="pub-cta" style="background:#F5F5F0;color:#1A1A1A">📩 Envoyer un message gratuit</button>
+          </div>
+        </div>
+
+        <!-- SEO FOOTER LINKS -->
+        <div style="margin-top:2.5rem;padding:1.5rem;background:#fff;border-radius:14px;border:1px solid #E8E8E0">
+          <div style="font-size:14px;font-weight:700;font-family:'Syne',sans-serif;color:#1A1A1A;margin-bottom:1rem">📍 Plombier dans les villes proches de Nice</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <a href="#" style="padding:6px 14px;background:#F5F5F0;border-radius:20px;font-size:13px;color:#555;text-decoration:none">Cannes</a>
+            <a href="#" style="padding:6px 14px;background:#F5F5F0;border-radius:20px;font-size:13px;color:#555;text-decoration:none">Antibes</a>
+            <a href="#" style="padding:6px 14px;background:#F5F5F0;border-radius:20px;font-size:13px;color:#555;text-decoration:none">Monaco</a>
+            <a href="#" style="padding:6px 14px;background:#F5F5F0;border-radius:20px;font-size:13px;color:#555;text-decoration:none">Menton</a>
+            <a href="#" style="padding:6px 14px;background:#F5F5F0;border-radius:20px;font-size:13px;color:#555;text-decoration:none">Grasse</a>
+            <a href="#" style="padding:6px 14px;background:#F5F5F0;border-radius:20px;font-size:13px;color:#555;text-decoration:none">Cagnes-sur-Mer</a>
+          </div>
+          <div style="font-size:14px;font-weight:700;font-family:'Syne',sans-serif;color:#1A1A1A;margin-top:1.25rem;margin-bottom:1rem">🔧 Autres artisans à Nice</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <a href="#" style="padding:6px 14px;background:#F5F5F0;border-radius:20px;font-size:13px;color:#555;text-decoration:none">Électricien Nice</a>
+            <a href="#" style="padding:6px 14px;background:#F5F5F0;border-radius:20px;font-size:13px;color:#555;text-decoration:none">Maçon Nice</a>
+            <a href="#" style="padding:6px 14px;background:#F5F5F0;border-radius:20px;font-size:13px;color:#555;text-decoration:none">Peintre Nice</a>
+            <a href="#" style="padding:6px 14px;background:#F5F5F0;border-radius:20px;font-size:13px;color:#555;color:#555;text-decoration:none">Serrurier Nice</a>
+            <a href="#" style="padding:6px 14px;background:#F5F5F0;border-radius:20px;font-size:13px;color:#555;text-decoration:none">Carreleur Nice</a>
+          </div>
+        </div>
+      </div>
+      <div class="pub-seo-footer">
+        <div><strong style="color:#ddd">LocalPro</strong> — Annuaire des artisans et métiers</div>
+        <div><a href="#">Plombier Nice</a> · <a href="#">Électricien Nice</a> · <a href="#">Maçon Nice</a> · <a href="#">Carreleur Nice</a> · <a href="#">Menuisier Nice</a></div>
+        <div style="margin-top:.5rem;font-size:12px;color:#555">© 2025 LocalPro · Mentions légales · CGU</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJOUT ENTREPRISE -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">Ajouter une entreprise</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nom de l'entreprise</label><input class="form-input" placeholder="Ex: Plomberie Martin"></div>
+      <div class="form-group"><label class="form-label">Responsable</label><input class="form-input" placeholder="Prénom Nom"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="contact@entreprise.fr"></div>
+      <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" placeholder="04 93 XX XX XX"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Métier</label><select class="form-select"><option>Plombier</option><option>Électricien</option><option>Maçon</option><option>Peintre</option><option>Serrurier</option><option>Menuisier</option><option>Carreleur</option><option>Toiture</option></select></div>
+      <div class="form-group"><label class="form-label">Ville</label><input class="form-input" placeholder="Nice"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Plan</label><select class="form-select"><option>Starter — 9 €/mois</option><option>Essentiel — 29 €/mois</option><option>Pro — 49 €/mois</option></select></div>
+      <div class="form-group"><label class="form-label">Statut</label><select class="form-select"><option>Actif</option><option>Essai gratuit</option><option>En attente</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Description / Présentation</label><textarea class="form-input" rows="3" placeholder="Décrivez l'activité de l'entreprise..." style="resize:vertical"></textarea></div>
+    <div class="modal-footer">
+      <button class="nav-btn btn-outline" onclick="closeModal()">Annuler</button>
+      <button class="nav-btn btn-primary" onclick="closeModal()">Ajouter l'entreprise</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const entreprises=[
+  {init:'PM',bg:'#2A2010',co:'#F5A623',name:'Plomberie Martin',email:'paul.martin@gmail.com',metier:'Plombier',ville:'Nice',plan:'Pro',plan_class:'badge-amber',statut:'Actif',statut_class:'badge-green',depuis:'Jan 2024',visites:480,msgs:14,mrr:'49 €'},
+  {init:'ÉD',bg:'#0D1A2E',co:'#4A90E2',name:'Élec Dubois',email:'m.dubois@elec.fr',metier:'Électricien',ville:'Nice',plan:'Essentiel',plan_class:'badge-blue',statut:'Actif',statut_class:'badge-green',depuis:'Mar 2024',visites:310,msgs:8,mrr:'29 €'},
+  {init:'RN',bg:'#0D2420',co:'#3DD68C',name:'Renov\'Nice',email:'contact@renovnice.fr',metier:'Maçon',ville:'Nice',plan:'Starter',plan_class:'badge-green',statut:'Essai',statut_class:'badge-amber',depuis:'Mar 2025',visites:42,msgs:2,mrr:'0 €'},
+  {init:'TB',bg:'#2A0F0F',co:'#FF6B6B',name:'Toiture Brun',email:'brun.toiture@yahoo.fr',metier:'Couvreur',ville:'Nice',plan:'Pro',plan_class:'badge-amber',statut:'Impayé',statut_class:'badge-red',depuis:'Juin 2024',visites:220,msgs:5,mrr:'49 €'},
+  {init:'MC',bg:'#1A1230',co:'#A78BFA',name:'Menuiserie CA',email:'contact@menuiserieca.fr',metier:'Menuisier',ville:'Cannes',plan:'Essentiel',plan_class:'badge-blue',statut:'Actif',statut_class:'badge-green',depuis:'Fév 2024',visites:190,msgs:11,mrr:'29 €'},
+  {init:'SP',bg:'#0D2420',co:'#3DD68C',name:'Serrurerie Pro',email:'contact@serrpro.fr',metier:'Serrurier',ville:'Antibes',plan:'Pro',plan_class:'badge-amber',statut:'Actif',statut_class:'badge-green',depuis:'Avr 2024',visites:350,msgs:19,mrr:'49 €'},
+];
+
+function renderEntreprises(){
+  const tb=document.getElementById('entreprisesTable');
+  tb.innerHTML=entreprises.map(e=>`
+    <tr>
+      <td><div class="company-row"><div class="avatar" style="background:${e.bg};color:${e.co}">${e.init}</div><div class="company-info"><div class="name">${e.name}</div><div class="sub">${e.email}</div></div></div></td>
+      <td>${e.metier}</td><td>${e.ville}</td>
+      <td><span class="badge ${e.plan_class}">${e.plan}</span></td>
+      <td><span class="badge ${e.statut_class}">${e.statut}</span></td>
+      <td style="color:var(--text3)">${e.depuis}</td>
+      <td>${e.visites}</td>
+      <td>${e.msgs}</td>
+      <td style="font-weight:500;color:var(--amber)">${e.mrr}</td>
+    </tr>`).join('');
+}
+
+const visitData=[820,940,1050,980,1200,1340,1480,1620,1800,1980,2100,2340];
+const revenueData=[1200,1500,1800,2100,2400,2800,3100,3400,3700,4100,4480,4820];
+const months=['Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc','Jan','Fév','Mar'];
+
+function renderBarChart(containerId, labelsId, data, color='#F5A623'){
+  const max=Math.max(...data);
+  const c=document.getElementById(containerId);
+  const l=document.getElementById(labelsId);
+  c.innerHTML=data.map(v=>`<div class="bar-wrap"><div class="bar" style="height:${(v/max*100)}%;background:${color}"></div></div>`).join('');
+  l.innerHTML=months.map(m=>`<span style="font-size:11px;color:var(--text3);flex:1;text-align:center">${m}</span>`).join('');
+}
+
+const seoPages=[
+  {url:'/plombier/nice',title:'Plombier à Nice',pos:'#2',clics:1240,imp:8900},
+  {url:'/electricien/nice',title:'Électricien à Nice',pos:'#3',clics:980,imp:7200},
+  {url:'/macon/nice',title:'Maçon à Nice',pos:'#5',clics:640,imp:5400},
+  {url:'/peintre/nice',title:'Peintre à Nice',pos:'#7',clics:520,imp:4800},
+  {url:'/serrurier/nice',title:'Serrurier à Nice',pos:'#11',clics:310,imp:3200},
+  {url:'/menuisier/cannes',title:'Menuisier à Cannes',pos:'#4',clics:420,imp:3900},
+  {url:'/plombier/cannes',title:'Plombier à Cannes',pos:'#6',clics:380,imp:3600},
+  {url:'/electricien/antibes',title:'Électricien à Antibes',pos:'#8',clics:290,imp:2800},
+  {url:'/couvreur/nice',title:'Couvreur à Nice',pos:'#9',clics:260,imp:2400},
+];
+
+function renderSEO(){
+  const g=document.getElementById('seoGrid');
+  const posClass=p=>parseInt(p.slice(1))<=5?'badge-green':parseInt(p.slice(1))<=10?'badge-amber':'badge-blue';
+  g.innerHTML=seoPages.map(s=>`
+    <div class="seo-page-card">
+      <div class="seo-url">${s.url}</div>
+      <div class="seo-title-text">${s.title}</div>
+      <div class="seo-meta">
+        <span class="badge ${posClass(s.pos)}" style="padding:2px 8px;font-size:11px">Google ${s.pos}</span>
+        <span>${s.clics.toLocaleString()} clics</span>
+        <span>${(s.imp/1000).toFixed(1)}K impr.</span>
+      </div>
+    </div>`).join('');
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const idx=['dashboard','entreprises','abonnements','messages','seo','public'].indexOf(id);
+  document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+}
+
+function openModal(){document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()});
+
+function selectMsg(el,company,visitor,preview,time){
+  document.querySelectorAll('.msg-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  el.querySelector('.msg-unread')&&(el.querySelector('.msg-unread').remove());
+  document.getElementById('msg-panel-title').textContent=`${visitor} → ${company}`;
+  document.getElementById('msg-thread').innerHTML=`
+    <div><div class="bubble visitor">${preview}</div><div class="bubble-time">${visitor} · ${time}</div></div>
+  `;
+}
+
+function sendAdminMsg(){
+  const inp=document.getElementById('msg-input-field');
+  if(!inp.value.trim())return;
+  const thread=document.getElementById('msg-thread');
+  const div=document.createElement('div');
+  div.style.alignSelf='flex-end';div.style.textAlign='right';
+  div.innerHTML=`<div class="bubble company">${inp.value}</div><div class="bubble-time">Admin · maintenant</div>`;
+  thread.appendChild(div);
+  inp.value='';
+  thread.scrollTop=thread.scrollHeight;
+}
+
+renderEntreprises();
+renderBarChart('visitChart','visitLabels',visitData,'#4A90E2');
+renderBarChart('revenueChart','revenueLabels',revenueData,'#F5A623');
+renderSEO();
+</script>
+</body>
+</html>

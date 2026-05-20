@@ -1,0 +1,340 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// --- Rôles ---
+enum Role {
+  SUPER_ADMIN
+  DIRECTORY_ADMIN
+  COMPANY
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+// --- Annuaire (tenant) ---
+model Directory {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  tagline       String?
+  description   String?
+  logoUrl       String?
+  faviconUrl    String?
+  primaryColor  String   @default("#F5A623")
+  darkBg        String   @default("#0F1117")
+  emailFrom     String
+  // Domaines qui résolvent vers cet annuaire (hostname header)
+  domains       String[] @default([])
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  categories    Category[]
+  plans         Plan[]
+  seoPages      SeoPage[]
+  listings      Listing[]
+  subscriptions Subscription[]
+  messages      Message[]
+  reviews       Review[]
+  admins        User[]
+}
+
+// --- Catégories (métiers) par annuaire ---
+model Category {
+  id          String  @id @default(cuid())
+  directoryId String
+  directory   Directory @relation(fields: [directoryId], references: [id], onDelete: Cascade)
+  slug        String
+  label       String
+  icon        String?  // emoji ou glyph custom
+  color       String?  // couleur de fond hex
+  sortOrder   Int     @default(0)
+  createdAt   DateTime @default(now())
+
+  listings    Listing[]
+  seoPages    SeoPage[]
+
+  @@unique([directoryId, slug])
+  @@index([directoryId])
+}
+
+// --- Plans par annuaire ---
+model Plan {
+  id            String   @id @default(cuid())
+  directoryId   String
+  directory     Directory @relation(fields: [directoryId], references: [id], onDelete: Cascade)
+  key           String   // STARTER | ESSENTIEL | PRO ou libre
+  name          String
+  priceCents    Int
+  priority      Int      @default(1) // Pro=3, Essentiel=2, Starter=1
+  stripePriceId String?
+  features      String[] @default([])
+  trialDays     Int      @default(14)
+  sortOrder     Int      @default(0)
+
+  subscriptions Subscription[]
+
+  @@unique([directoryId, key])
+  @@index([directoryId])
+}
+
+// --- Entreprise (client global) ---
+model Company {
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  email            String   @unique
+  phone            String?
+  website          String?
+  stripeCustomerId String?  @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user          User?
+  listings      Listing[]
+  subscriptions Subscription[]
+  payments      Payment[]
+}
+
+// --- Fiche par annuaire ---
+model Listing {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  directoryId String
+  directory   Directory @relation(fields: [directoryId], references: [id], onDelete: Cascade)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  slug         String
+  ville        String
+  villeLabel   String?
+  description  String?
+  address      String?
+  photos       String[]  @default([])
+  rating       Float     @default(0)
+  reviewCount  Int       @default(0)
+  priority     Int       @default(1)
+  isPublished  Boolean   @default(true)
+  // Réseaux sociaux
+  whatsapp     String?   // numéro au format international "+33..."
+  facebook     String?   // URL complète
+  instagram    String?   // URL ou @handle
+  // Intégration Google Business Profile
+  googlePlaceId      String?
+  googleRating       Float?
+  googleReviewCount  Int?
+  googleReviewsJson  Json?     // cache des 5 avis les plus récents
+  googleMapsUrl      String?
+  googleSyncedAt     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  messages Message[]
+  reviews  Review[]
+  services Service[]
+
+  @@unique([directoryId, slug])
+  @@unique([companyId, directoryId])
+  @@index([directoryId, categoryId, ville, priority])
+  @@index([directoryId, isPublished])
+}
+
+// --- Abonnement (Company × Directory) ---
+model Subscription {
+  id              String             @id @default(cuid())
+  companyId       String
+  company         Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  directoryId     String
+  directory       Directory          @relation(fields: [directoryId], references: [id], onDelete: Cascade)
+  planId          String
+  plan            Plan               @relation(fields: [planId], references: [id])
+
+  status          SubscriptionStatus @default(TRIAL)
+  stripeSubId     String?            @unique
+  paymentFailures Int                @default(0)
+  subscriptionEnd DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@unique([companyId, directoryId])
+  @@index([directoryId, status])
+}
+
+// --- Services proposés sur une fiche ---
+model Service {
+  id         String   @id @default(cuid())
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  title      String
+  items      String[] @default([])  // tirets / options du service
+  priceLabel String?                // "à partir de 80€", "Sur devis", "80€", etc.
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([listingId, sortOrder])
+}
+
+// --- Messagerie (scoped Listing) ---
+model Message {
+  id          String    @id @default(cuid())
+  listingId   String
+  listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  directoryId String
+  directory   Directory @relation(fields: [directoryId], references: [id], onDelete: Cascade)
+  senderName  String
+  senderEmail String
+  senderIp    String?
+  content     String
+  reply       String?
+  isRead      Boolean   @default(false)
+  repliedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([directoryId, createdAt])
+  @@index([listingId, createdAt])
+  @@index([directoryId, isRead])
+}
+
+// --- Avis ---
+model Review {
+  id          String   @id @default(cuid())
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  directoryId String
+  directory   Directory @relation(fields: [directoryId], references: [id], onDelete: Cascade)
+  authorName  String
+  rating      Int
+  comment     String?
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([listingId])
+  @@index([directoryId])
+}
+
+// --- Historique paiements ---
+model Payment {
+  id              String   @id @default(cuid())
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  directoryId     String?
+  subscriptionId  String?
+  stripeInvoiceId String?  @unique
+  amountCents     Int
+  currency        String   @default("eur")
+  status          String
+  createdAt       DateTime @default(now())
+
+  @@index([companyId, createdAt])
+  @@index([directoryId, createdAt])
+}
+
+// --- Pages SEO par annuaire ---
+model SeoPage {
+  id          String   @id @default(cuid())
+  directoryId String
+  directory   Directory @relation(fields: [directoryId], references: [id], onDelete: Cascade)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  metier      String
+  metierLabel String
+  ville       String
+  villeLabel  String
+  villeInsee  String?
+  departement String?
+  departementLabel String?
+  region      String?
+  regionLabel String?
+  slug        String   // metier/ville, unique par directory
+  title       String
+  description String
+  h1          String
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([directoryId, slug])
+  @@unique([directoryId, metier, ville])
+  @@index([directoryId, isPublished])
+  @@index([directoryId, region, departement])
+}
+
+// --- Référentiel géographique ---
+model GeoRegion {
+  code        String @id // code INSEE région
+  slug        String @unique
+  name        String
+
+  departements GeoDepartement[]
+}
+
+model GeoDepartement {
+  code       String @id // ex: "06"
+  slug       String @unique
+  name       String
+  regionCode String
+  region     GeoRegion @relation(fields: [regionCode], references: [code])
+
+  villes     GeoVille[]
+}
+
+model GeoVille {
+  insee           String  @id
+  slug            String  @unique
+  name            String
+  postalCodes     String[]
+  departementCode String
+  departement     GeoDepartement @relation(fields: [departementCode], references: [code])
+  population      Int     @default(0)
+  lat             Float?
+  lng             Float?
+
+  @@index([departementCode])
+  @@index([slug])
+}
+
+// --- Magic-link tokens ---
+model LoginToken {
+  id         String    @id @default(cuid())
+  tokenHash  String    @unique
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+}
+
+// --- Utilisateurs ---
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  password     String?
+  name         String?
+  role         Role       @default(COMPANY)
+  // SUPER_ADMIN: null
+  // DIRECTORY_ADMIN: id de l'annuaire qu'il administre
+  directoryId  String?
+  directory    Directory? @relation(fields: [directoryId], references: [id])
+  // COMPANY: id de la société
+  companyId    String?    @unique
+  company      Company?   @relation(fields: [companyId], references: [id])
+  createdAt    DateTime   @default(now())
+
+  loginTokens  LoginToken[]
+}
