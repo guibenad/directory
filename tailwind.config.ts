@@ -5,8 +5,10 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        syne: ["var(--font-syne)", "Syne", "sans-serif"],
-        sans: ["var(--font-dm-sans)", "DM Sans", "system-ui", "sans-serif"],
+        // Une seule famille Inter pour tout le site — aspect plus pro et lisible.
+        // `font-syne` est gardé comme alias (utilisé dans ~100 composants) → mappé vers Inter avec letter-spacing serré.
+        sans: ["var(--font-sans)", "Inter", "system-ui", "sans-serif"],
+        syne: ["var(--font-sans)", "Inter", "system-ui", "sans-serif"],
       },
       colors: {
         bg: "var(--bg)",

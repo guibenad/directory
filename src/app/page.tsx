@@ -84,7 +84,7 @@ export default async function HomePage() {
             </div>
 
             <h1 className="font-syne text-[clamp(38px,6vw,68px)] font-extrabold leading-[1.02] tracking-[-0.02em] text-[color:var(--ink)]">
-              Trouvez <span className="italic">le bon pro</span>
+              Trouvez <span className="text-[color:var(--accent)]">le bon pro</span>
               <br />
               <span className="relative inline-block">
                 près de chez vous
