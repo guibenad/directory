@@ -98,7 +98,9 @@ h6 {
 .theme-public h2,
 .theme-public h3,
 .theme-public h4 {
-  color: var(--ink);
+  /* `inherit` permet aux sections sur fond sombre (CTA noir, hero, etc.)
+     d'imposer leur propre couleur via `text-white` sans être écrasées. */
+  color: inherit;
 }
 
 /* Grain texture overlay (data URI SVG noise) */
