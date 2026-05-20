@@ -204,7 +204,7 @@ export default async function RegionPage({ params }: { params: Params }) {
                 <ul className="flex flex-wrap gap-2">
                   {d.villes.map((v) => (
                     <li key={v.slug}>
-                      <Link href={`/${v.slug}` as never} className="pill">
+                      <Link href={`/ville/${v.slug}` as never} className="pill">
                         {v.name}
                       </Link>
                     </li>
