@@ -17,11 +17,9 @@ export const dynamicParams = true;
 type Params = { slug: string };
 
 export async function generateStaticParams(): Promise<Params[]> {
-  const villes = await prisma.geoVille.findMany({
-    select: { slug: true },
-    where: { population: { gte: 5000 } },
-    take: 1000,
-  });
+  // Prégénération de toutes les villes (>2000 hab) pour éviter les cold-starts
+  // sur les fiches villes les moins consultées. ~5500 pages générées au build.
+  const villes = await prisma.geoVille.findMany({ select: { slug: true } });
   return villes.map((v) => ({ slug: v.slug }));
 }
 
